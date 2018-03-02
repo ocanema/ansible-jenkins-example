@@ -1,0 +1,75 @@
+---
+
+- name: Create user {{ jenkins_user }}
+  user:
+    name: "{{ jenkins_user }}"
+    comment: "Jenkins User"
+  when: jenkins_user != "root"
+
+- name: Create Jenkins dir on "{{ jenkins_dest_location }}"
+  file: path="{{ jenkins_home }}" state=directory
+
+- name: Create custom init scripts directory.
+  file:
+    path: "{{ jenkins_home }}/init.groovy.d"
+    state: directory
+    owner: "{{ jenkins_user }}"
+    group: "{{ jenkins_user }}"
+    mode: 0775
+  notify: configure user
+
+- meta: flush_handlers
+
+- name: Download latest jenkins war
+  get_url:
+    url: "{{ jenkins_remote_war }}"
+    dest:  "{{ jenkins_dest_location }}"
+    mode: 0644
+  when: jenkins_download_war == true
+
+- name: Copy Jenkins war to server
+  copy:
+    src: files/jenkins.war
+    dest: "{{ jenkins_dest_location }}"
+    mode: 0644
+  when: jenkins_download_war is undefined or jenkins_download_war == false
+
+- name: Ensure Jenkins User permissions
+  file:
+    path: "{{ jenkins_dest_location }}"
+    owner: "{{ jenkins_user }}"
+    group: "{{ jenkins_user }}"
+    recurse: yes
+
+- name: Check for Jenkins firewall service
+  command: firewall-cmd --info-service=jenkins
+  register: firewall_out
+  ignore_errors: true
+
+- name: Ensure Jenkins port exception on firewall
+  shell: |
+    firewall-cmd --permanent --new-service=jenkins
+    firewall-cmd --permanent --service=jenkins --set-short="Jenkins Service Ports"
+    firewall-cmd --permanent --service=jenkins --set-description="Jenkins service firewalld port exceptions"
+    firewall-cmd --permanent --service=jenkins --add-port=8080/tcp
+    firewall-cmd --permanent --add-service=jenkins
+    firewall-cmd --zone=public --add-service=http --permanent
+    firewall-cmd --reload
+  when: firewall_out.rc != 0 and firewall_out.rc != 2
+
+- name: Create systemd service file
+  template:
+    src: jenkins.j2
+    dest: /etc/systemd/system/jenkins.service
+    mode: 0644
+  notify:
+    - reload-daemon
+    - start jenkins
+    - wait jenkins
+
+- meta: flush_handlers
+
+- name: Remove Jenkins security init scripts after first startup.
+  file:
+    path: "{{ jenkins_home }}/init.groovy.d/basic-security.groovy"
+    state: absent

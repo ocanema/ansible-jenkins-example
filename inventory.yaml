@@ -1,0 +1,10 @@
+local:
+  hosts:
+    s1:
+      ansible_host: localhost
+amazon:
+  hosts:
+    amazon_1:
+      ansible_host: ip_amazon_server
+    amazon_2:
+      ansible_host: ip_amazon_server

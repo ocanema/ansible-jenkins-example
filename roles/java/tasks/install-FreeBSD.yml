@@ -1,0 +1,7 @@
+---
+
+- name: Install java
+  pkgng:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ java_packages }}"

@@ -1,0 +1,110 @@
+---
+
+  # Jenkins default admin/password
+jenkins_admin_username: admin
+jenkins_admin_password: admin
+
+  # JAVA_OPTS for jenkins execution 
+jenkins_java_opts: "-Djenkins.install.runSetupWizard=false"
+
+  # Jenkins root destination
+jenkins_dest_location: /opt/ci/jenkins
+
+jenkins_remote_war: "http://mirrors.jenkins.io/war-stable/latest/jenkins.war"
+
+jenkins_war_path: "{{ jenkins_dest_location }}/jenkins.war"
+
+  # jenkins_home directory
+jenkins_home: "{{ jenkins_dest_location }}/jenkins_home"
+
+  # jenkins plugins url
+jenkins_update_center_download_url: "http://updates.jenkins-ci.org/download"
+
+  # jenkins plugins directory
+jenkins_plugins_dir: "{{ jenkins_home }}/plugins/"
+
+  # Jenkins system process user 
+jenkins_user: jenkins
+
+  # If jenkins_download_war: false or undefined the instalation will
+  #   try find jenkins.war on files directory
+jenkins_download_war: true
+
+  #default Jenkins 2.89.4 plugins
+jenkins_plugins:
+  - script-security
+  - command-launcher
+  - cloudbees-folder
+  - bouncycastle-api
+  - structs
+  - workflow-step-api
+  - scm-api
+  - workflow-api
+  - junit
+  - antisamy-markup-formatter
+  - workflow-support
+  - workflow-job
+  - token-macro
+  - build-timeout
+  - credentials
+  - ssh-credentials
+  - plain-credentials
+  - credentials-binding
+  - timestamper
+  - durable-task
+  - workflow-durable-task-step
+  - matrix-project
+  - resource-disposer
+  - ws-cleanup
+  - ant
+  - gradle
+  - pipeline-milestone-step
+  - jquery-detached
+  - jackson2-api
+  - ace-editor
+  - workflow-scm-step
+  - workflow-cps
+  - pipeline-input-step
+  - pipeline-stage-step
+  - pipeline-graph-analysis
+  - pipeline-rest-api
+  - handlebars
+  - momentjs
+  - pipeline-stage-view
+  - pipeline-build-step
+  - pipeline-model-api
+  - pipeline-model-extensions
+  - apache-httpcomponents-client-4-api
+  - jsch
+  - git-client
+  - git-server
+  - workflow-cps-global-lib
+  - display-url-api
+  - mailer
+  - branch-api
+  - workflow-multibranch
+  - authentication-tokens
+  - docker-commons
+  - docker-workflow
+  - pipeline-stage-tags-metadata
+  - pipeline-model-declarative-agent
+  - workflow-basic-steps
+  - pipeline-model-definition
+  - workflow-aggregator
+  - github-api
+  - git
+  - github
+  - github-branch-source
+  - pipeline-github-lib
+  - mapdb-api
+  - subversion
+  - ssh-slaves
+  - matrix-auth
+  - pam-auth
+  - ldap
+  - email-ext
+  - maven-plugin
+  - javadoc
+  - pipeline-maven
+  - config-file-provider
+  

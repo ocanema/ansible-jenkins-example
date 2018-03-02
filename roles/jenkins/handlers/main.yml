@@ -1,0 +1,32 @@
+---
+
+- name: reload-daemon
+  command: systemctl daemon-reload
+  ignore_errors: true
+
+- name: restart jenkins
+  service:
+    name: jenkins
+    state: restarted
+
+- name: start jenkins
+  service:
+    name: jenkins.service
+    enabled: yes
+    state: started
+
+- name: wait jenkins
+  uri:
+    url:  "http://localhost:8080/login"
+  register: resp
+  until: resp.status|default(false) == 200
+  retries: 10
+  delay: 10
+
+- name: configure user
+  template:
+    src: basic-security.j2
+    dest: "{{ jenkins_home }}/init.groovy.d/basic-security.groovy"
+    owner: "{{ jenkins_user }}"
+    group: "{{ jenkins_user }}"
+    mode: 0775

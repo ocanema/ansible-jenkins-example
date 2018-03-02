@@ -1,0 +1,12 @@
+---
+
+# tasks file for jenkins
+- include: requirements.yml
+
+- include: install.yml
+
+- include: install-plugins.yml
+  tags:
+    - plugins
+
+- include: post-install.yml

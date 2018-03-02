@@ -1,0 +1,52 @@
+#!groovy
+import hudson.security.*
+import hudson.security.csrf.DefaultCrumbIssuer
+import jenkins.model.*
+import jenkins.security.s2m.AdminWhitelistRule
+
+def instance = Jenkins.getInstance()
+def hudsonRealm = new HudsonPrivateSecurityRealm(false)
+def users = hudsonRealm.getAllUsers()
+users_s = users.collect { it.toString() }
+
+// Create the admin user account if it doesn't already exist.
+if ("{{ jenkins_admin_username }}" in users_s) {
+    println "Admin user already exists - updating password"
+
+    def user = hudson.model.User.get('{{ jenkins_admin_username }}');
+    def password = hudson.security.HudsonPrivateSecurityRealm.Details.fromPlainPassword('{{ jenkins_admin_password }}')
+    user.addProperty(password)
+    user.save()
+}
+else {
+    println "--> creating local admin user"
+
+    hudsonRealm.createAccount('{{ jenkins_admin_username }}', '{{ jenkins_admin_password }}')
+    instance.setSecurityRealm(hudsonRealm)
+
+    def strategy = new FullControlOnceLoggedInAuthorizationStrategy()
+    instance.setAuthorizationStrategy(strategy)
+    instance.save()
+}
+
+// Disable remoting
+instance.getDescriptor("jenkins.CLI").get().setEnabled(false)
+
+// Enable Agent to master security subsystem
+instance.injector.getInstance(AdminWhitelistRule.class).setMasterKillSwitch(false);
+
+// Disable jnlp
+instance.setSlaveAgentPort(-1);
+
+//  CSRF Protection
+instance.setCrumbIssuer(new DefaultCrumbIssuer(true))
+
+// Disable old Non-Encrypted protocols
+HashSet<String> newProtocols = new HashSet<>(instance.getAgentProtocols());
+newProtocols.removeAll(Arrays.asList(
+        "JNLP3-connect", "JNLP2-connect", "JNLP-connect", "CLI-connect"
+));
+instance.setAgentProtocols(newProtocols);
+
+instance.save()
+
